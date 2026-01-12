@@ -16,7 +16,7 @@ def creatCMD(full_path, result_txt, result_png):
         // ---- Small vessels ----
         run("8-bit"); 
         //setAutoThreshold("Otsu dark");
-        run("Tubeness", "sigma=5.5 black");
+        run("Tubeness", "sigma=5 black");
         run("Convert to Mask");
         rename("mask_small");
         run("Duplicate...", "title=mask_small_copy");
@@ -25,7 +25,7 @@ def creatCMD(full_path, result_txt, result_png):
         selectWindow("{img_name}");
         run("8-bit"); 
         //setAutoThreshold("Otsu dark");
-        run("Tubeness", "sigma=8.5 black");
+        run("Tubeness", "sigma=9 black");
         run("Convert to Mask");
         rename("mask_large");
         run("Duplicate...", "title=mask_large_copy");
