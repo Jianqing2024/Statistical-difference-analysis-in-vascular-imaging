@@ -35,12 +35,6 @@ def creatCMD(full_path, result_txt, result_png):
         rename("mask_final");
         selectWindow("mask_final");
 
-        // ---- Skeleton analysis ----
-        run("Skeletonize"); 
-        run("Analyze Skeleton (2D/3D)", "prune=none calculate");
-
-        // ---- Save ----
-        saveAs("Results", "{result_txt}"); 
         saveAs("PNG", "{result_png}");
 
         run("Close All");

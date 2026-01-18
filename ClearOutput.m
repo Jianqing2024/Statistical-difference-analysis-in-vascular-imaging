@@ -1,5 +1,5 @@
 clear;clc
-folderPath = 'D:\WORK\GYY\normal\output';
+folderPath = 'D:\WORK\Statistical-difference-analysis-in-vascular-imaging\normal\output';
 delete(fullfile(folderPath, '*'));
-folderPath = 'D:\WORK\GYY\tumer\output';
+folderPath = 'D:\WORK\Statistical-difference-analysis-in-vascular-imaging\tumer\output';
 delete(fullfile(folderPath, '*'));

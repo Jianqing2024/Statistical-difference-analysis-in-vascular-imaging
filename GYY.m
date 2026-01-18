@@ -1,5 +1,5 @@
 clear; clc;
-folderPath = 'D:\WORK\GYY\normal\output';
+folderPath = 'D:\WORK\Statistical-difference-analysis-in-vascular-imaging\normal\output';
 txtFiles = dir(fullfile(folderPath, '*.txt'));
 
 tableList = cell(length(txtFiles), 1);  % 用 cell 存储表格
@@ -26,7 +26,7 @@ normalDATA = [Branches;ABL;MBL];
 
 save normalDATA.mat normalDATA
 %%
-folderPath = 'D:\WORK\GYY\tumer\output';
+folderPath = 'D:\WORK\Statistical-difference-analysis-in-vascular-imaging\tumer\output';
 txtFiles = dir(fullfile(folderPath, '*.txt'));
 
 tableList = cell(length(txtFiles), 1);  % 用 cell 存储表格
