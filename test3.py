@@ -10,34 +10,22 @@ def creatCMD(full_path, result_txt, result_png):
     img_name = os.path.basename(full_path)
 
     macro_cmd = f""" 
+        run("Clear Results");
         open("{full_path}");
         selectWindow("{img_name}");
 
         // ---- Small vessels ----
         run("8-bit"); 
-        //setAutoThreshold("Otsu dark");
-        run("Tubeness", "sigma=4 black");
+        setAutoThreshold("Otsu");
+
+        // 转换为二值图
         run("Convert to Mask");
-        rename("mask_small");
-        run("Duplicate...", "title=mask_small_copy");
 
-        // ---- Large vessels ----
-        selectWindow("{img_name}");
-        run("8-bit"); 
-        //setAutoThreshold("Otsu dark");
-        run("Tubeness", "sigma=9 black");
-        run("Convert to Mask");
-        rename("mask_large");
-        run("Duplicate...", "title=mask_large_copy");
+        // 设置测量项目
+        run("Set Measurements...", "area area_fraction redirect=None decimal=3");
 
-        // ---- Combine masks ----
-        imageCalculator("OR create", "mask_small_copy", "mask_large_copy");
-        rename("mask_final");
-        selectWindow("mask_final");
-
-        // ---- Skeleton analysis ----
-        run("Skeletonize"); 
-        run("Analyze Skeleton (2D/3D)", "prune=none calculate");
+        // 执行测量
+        run("Measure");
 
         // ---- Save ----
         saveAs("Results", "{result_txt}"); 

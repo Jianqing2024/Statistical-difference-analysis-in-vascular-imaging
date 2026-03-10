@@ -17,7 +17,7 @@ Branches = zeros(1,length(txtFiles));
 ABL = zeros(1,length(txtFiles));
 MBL = zeros(1,length(txtFiles));
 for i = 1:length(txtFiles)
-    Branches(i) = mean(tableList{i}.("# Branches"));
+    Branches(i) = sum(tableList{i}.("# Branches"));
     ABL(i) = mean(tableList{i}.("Average Branch Length"));
     MBL(i) = mean(tableList{i}.("Maximum Branch Length"));
 end
@@ -44,7 +44,7 @@ Branches = zeros(1,length(txtFiles));
 ABL = zeros(1,length(txtFiles));
 MBL = zeros(1,length(txtFiles));
 for i = 1:length(txtFiles)
-    Branches(i) = mean(tableList{i}.("# Branches"));
+    Branches(i) = sum(tableList{i}.("# Branches"));
     ABL(i) = mean(tableList{i}.("Average Branch Length"));
     MBL(i) = mean(tableList{i}.("Maximum Branch Length"));
 end
