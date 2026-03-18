@@ -47,7 +47,6 @@ def creatCMD(full_path, result_txt, result_png):
     """ 
     return macro_cmd
 
-
 def run_fiji(ij, base_name, result_txt, result_png):
 
     # 拼接宏命令
@@ -64,7 +63,7 @@ current_dir = os.getcwd()
 print(f"当前目录: {current_dir}")
 
 # 目标子文件夹
-folders = ['tumer', 'normal']
+folders = ['tumer', 'normal', 'HC']
 
 # 用于存放所有文件的列表
 all_files = []
