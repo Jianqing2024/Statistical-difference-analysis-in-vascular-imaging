@@ -2,3 +2,7 @@ __pycache__/
 *.txt
 *.png
 *.mat
+*.MP4
+*.dat
+*.tif
+*.npy

@@ -41,7 +41,7 @@ def creatCMD(full_path, result_txt, result_png):
 
         // ---- Save ----
         saveAs("Results", "{result_txt}"); 
-        saveAs("PNG", "{result_png}");
+        saveAs("Tiff", "{result_png}");
 
         run("Close All");
     """ 
