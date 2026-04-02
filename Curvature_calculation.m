@@ -1,6 +1,5 @@
 clear;clc
 I = imread('D:\WORK\Statistical-difference-analysis-in-vascular-imaging\normal\output\1170p_branch.tif');
-I = imread('tubeness of Y2 - 副本.tif');
 BW = I > 0;
 imshow(BW)
 

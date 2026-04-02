@@ -12,11 +12,16 @@ def creatCMD(full_path, result_txt, result_png):
     macro_cmd = f""" 
         open("{full_path}");
         selectWindow("{img_name}");
+        //w = getWidth();
+        //h = getHeight();
+
+        //target_h = w * 5 / 4;
+        //run("Size...", "width=" + w + " height=" + target_h + " interpolation=Bilinear");
 
         // ---- Small vessels ----
         run("8-bit"); 
         //setAutoThreshold("Otsu dark");
-        run("Tubeness", "sigma=3 black");
+        run("Tubeness", "sigma=12 black");
         run("Convert to Mask");
         rename("mask_small");
         run("Duplicate...", "title=mask_small_copy");
@@ -25,7 +30,7 @@ def creatCMD(full_path, result_txt, result_png):
         selectWindow("{img_name}");
         run("8-bit"); 
         //setAutoThreshold("Otsu dark");
-        run("Tubeness", "sigma=6 black");
+        run("Tubeness", "sigma=20 black");
         run("Convert to Mask");
         rename("mask_large");
         run("Duplicate...", "title=mask_large_copy");
@@ -35,12 +40,17 @@ def creatCMD(full_path, result_txt, result_png):
         rename("mask_final");
         selectWindow("mask_final");
 
-        saveAs("PNG", "{result_png}");
+        // ---- Skeleton analysis ----
+        run("Skeletonize"); 
+        run("Analyze Skeleton (2D/3D)", "prune=none calculate");
+
+        // ---- Save ----
+        saveAs("Results", "{result_txt}"); 
+        saveAs("Tiff", "{result_png}");
 
         run("Close All");
     """ 
     return macro_cmd
-
 
 def run_fiji(ij, base_name, result_txt, result_png):
 
@@ -67,7 +77,7 @@ for folder in folders:
     folder_path = os.path.join(current_dir, folder)
     if os.path.exists(folder_path):
         # 查找该文件夹下所有 .png 文件
-        png_files = glob(os.path.join(folder_path, '*.png'))
+        png_files = glob(os.path.join(folder_path, '*.jpg'))
         all_files.extend(png_files)  # 添加到总列表
     else:
         print(f"警告: 文件夹不存在 -> {folder_path}")
