@@ -12,6 +12,7 @@ def creatCMD(full_path, result_txt, result_png):
     macro_cmd = f""" 
         open("{full_path}");
         selectWindow("{img_name}");
+        //如需进行比例矫正，请为以下代码取消矫正
         //w = getWidth();
         //h = getHeight();
 

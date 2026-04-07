@@ -1,21 +1,9 @@
 import cupy as cp
 from cupyx.scipy.ndimage import median_filter, uniform_filter1d
 import numpy as np
+import matplotlib.pyplot as plt
 
-def detect_outliers_std(data, k=10):
-    mean = np.mean(data)
-    std = np.std(data)
-
-    lower = mean - k * std
-    upper = mean + k * std
-
-    mask = (data < lower) | (data > upper)
-    #print("阈值:", lower, upper)
-    #print("异常点占比:", np.sum(mask)/np.size(data))
-    data[mask] = 0
-    return data
-
-def Reconstruction532(file_path):
+def Reconstruction(file_path):
     shape = (1500, 1250, 2048)
 
     data = np.fromfile(file_path, dtype=np.int16)
@@ -31,6 +19,7 @@ def Enhancement_GPU(data):
     data: numpy.ndarray or cupy.ndarray
           shape = (Bscan, Aline, Sample)
     """
+
     # -------- 0. 转到GPU --------
     if not isinstance(data, cp.ndarray):
         data = cp.asarray(data, dtype=cp.float32)
@@ -40,8 +29,6 @@ def Enhancement_GPU(data):
     # -------- 1. Aline方向减直流 --------
     mean_aline = cp.mean(data, axis=2, keepdims=True)
     data = data - mean_aline
-    # 去除异常点
-    data = detect_outliers_std(data, k=5)
 
     # -------- 2. 5点中值滤波 --------
     data = median_filter(data, size=(1, 1, 5), mode='nearest')
@@ -64,20 +51,24 @@ def Enhancement_GPU(data):
 
     # Wiener增益
     gain = cp.maximum(0, local_var - noise_var) / (local_var + 1e-8)
-    
+
     # 输出
     data = local_mean + gain * (data - local_mean)
+    '''
+    # -------- 4. log压缩 --------
+    data = cp.abs(data)
+    data = 20 * cp.log10(data + 1e-6)
 
+    # -------- 5. 归一化 --------
+    data -= data.min()
+    data /= (data.max() + 1e-8)
+
+    data = (data * 255).astype(cp.uint8)
+    '''
     # -------- 6. 回CPU（可选）--------
     return cp.asnumpy(data)
 
-def nonlinear_cuda_style(mip,light=0,percent=50,noise=1e-6,gain=0):
-
-    # -------- 5. 归一化 --------
-    mip -= mip.min()
-    mip /= (mip.max() + 1e-8)
-
-    mip = (mip * 255).astype(cp.uint8)
+def nonlinear_cuda_style(mip,light=0,percent=50,noise=0,gain=0):
 
     # 参数
     k = 0.02 - gain / 10000.0
@@ -91,64 +82,43 @@ def nonlinear_cuda_style(mip,light=0,percent=50,noise=1e-6,gain=0):
     # 非线性 log 压缩（统一log底）
     # -----------------------------
     mip = np.log1p((mip + noise) * k) / np.log1p(k)
-    #print(np.max(mip))
-    #print(np.min(mip))
+
+    # -----------------------------
+    # 亮度调整
+    # -----------------------------
+    mip = mip + light
 
     # -----------------------------
     # 对比度拉伸（围绕127）
     # -----------------------------
-    #mip = 127 + (mip - 127) / a
+    mip = 127 + (mip - 127) / a
 
     # -----------------------------
     # 裁剪
     # -----------------------------
-    mip -= mip.min()
-    mip /= mip.max()
-    mip = (mip * 255).astype(np.uint8)
-    mip = mip + light
     mip = np.clip(mip, 0, 255)
 
     return mip.astype(np.uint8)
 
+data = Reconstruction('37data.dat')
+data = Enhancement_GPU(data)
 
-'''
-def nonlinear_cuda_style(mip, light=0, percent=50, noise=1e-6, gain=0):
-    """
-    改进版 log 压缩
-    适用于已归一化或 uint8 数据（0~255）
-    """
+mip = np.max(data, axis=2)
 
-    # -------- 1. 转 float --------
-    mip = mip.astype(np.float32)
+mip = nonlinear_cuda_style(mip)
 
-    # -------- 2. 可选：轻微抬底（避免全黑）--------
-    mip = mip + noise
+save_dir = "stay"
 
-    # -------- 3. log 压缩（核心修正）--------
-    # k 控制压缩强度（类似 gamma）
-    k = 0.02 - gain / 10000.0
-    k = max(k, 1e-6)
+plt.figure(figsize=(4,10))
 
-    mip = np.log1p(k * mip)
+plt.imshow(
+    mip,
+    cmap='hot',
+    aspect='auto'   # 或 'equal'
+)
+plt.yticks(np.arange(0, 1500, 100))
 
-    # -------- 4. 亮度调整 --------
-    mip = mip + light
-
-    # -------- 5. 百分位拉伸（替代你原来的 percent 逻辑）--------
-    low_p = percent / 2
-    high_p = 100 - percent / 2
-
-    low = np.percentile(mip, low_p)
-    high = np.percentile(mip, high_p)
-
-    mip = np.clip(mip, low, high)
-
-    # -------- 6. 归一化 --------
-    mip = mip - mip.min()
-    mip = mip / (mip.max() + 1e-12)
-
-    # -------- 7. 转 uint8 --------
-    mip = (mip * 255).astype(np.uint8)
-
-    return mip
-'''
+plt.xlabel("A-line (pixel)")
+plt.ylabel("B-scan (pixel)")
+plt.title("Maximum Projection (Pixel Coordinates)")
+plt.show()

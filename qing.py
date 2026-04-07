@@ -1,6 +1,49 @@
 import cupy as cp
 from cupyx.scipy.ndimage import median_filter, uniform_filter1d
 import numpy as np
+import os
+import matplotlib.pyplot as plt
+
+def Map(data):
+    data = Enhancement_GPU(data)
+    map = np.max(data, axis=2)
+    map = nonlinear_cuda_style(map)
+    return map
+
+def mapp(data):
+    return np.max(data, axis=2)
+
+def paint(mip, i):
+    import os
+    import matplotlib.pyplot as plt
+
+    save_dir = "output2"
+    os.makedirs(save_dir, exist_ok=True)
+
+    plt.figure(figsize=(4,10))
+    plt.axis('off')
+    plt.imshow(mip.get(), cmap='hot', aspect='auto')  # <-- 注意这里
+
+    plt.savefig(os.path.join(save_dir, f"slice_{i:03d}.png"),
+                dpi=300,
+                bbox_inches='tight',
+                pad_inches=0)
+    plt.close()
+
+def paint2(mip, i):
+    save_dir = "output2"
+    os.makedirs(save_dir, exist_ok=True)
+    plt.figure(figsize=(4,10))
+    plt.axis('off')
+    #plt.imshow(mip.get(mip), cmap='hot', aspect='auto')
+    plt.imshow(mip, cmap='hot', aspect='auto')
+
+    plt.savefig(os.path.join(save_dir, f"slice_{i:03d}.png"),
+                dpi=300,
+                bbox_inches='tight',
+                pad_inches=0)
+
+    plt.close()
 
 def detect_outliers_std(data, k=10):
     mean = np.mean(data)
@@ -38,15 +81,21 @@ def Enhancement_GPU(data):
         data = data.astype(cp.float32)
 
     # -------- 1. Aline方向减直流 --------
+    map = mapp(data)
+    paint(map, 1)
     mean_aline = cp.mean(data, axis=2, keepdims=True)
     data = data - mean_aline
     # 去除异常点
     data = detect_outliers_std(data, k=5)
 
     # -------- 2. 5点中值滤波 --------
+    map = mapp(data)
+    paint(map, 2)
     data = median_filter(data, size=(1, 1, 5), mode='nearest')
 
     # -------- 3. Wiener（向量化）--------
+    map = mapp(data)
+    paint(map, 3)
     radius = 7
     size = 2 * radius + 1
 
@@ -72,6 +121,7 @@ def Enhancement_GPU(data):
     return cp.asnumpy(data)
 
 def nonlinear_cuda_style(mip,light=0,percent=50,noise=1e-6,gain=0):
+    paint2(mip, 4)
 
     # -------- 5. 归一化 --------
     mip -= mip.min()
@@ -107,48 +157,11 @@ def nonlinear_cuda_style(mip,light=0,percent=50,noise=1e-6,gain=0):
     mip = (mip * 255).astype(np.uint8)
     mip = mip + light
     mip = np.clip(mip, 0, 255)
+    paint2(mip, 5)
 
     return mip.astype(np.uint8)
 
+file_path = 'D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\data.dat'
 
-'''
-def nonlinear_cuda_style(mip, light=0, percent=50, noise=1e-6, gain=0):
-    """
-    改进版 log 压缩
-    适用于已归一化或 uint8 数据（0~255）
-    """
-
-    # -------- 1. 转 float --------
-    mip = mip.astype(np.float32)
-
-    # -------- 2. 可选：轻微抬底（避免全黑）--------
-    mip = mip + noise
-
-    # -------- 3. log 压缩（核心修正）--------
-    # k 控制压缩强度（类似 gamma）
-    k = 0.02 - gain / 10000.0
-    k = max(k, 1e-6)
-
-    mip = np.log1p(k * mip)
-
-    # -------- 4. 亮度调整 --------
-    mip = mip + light
-
-    # -------- 5. 百分位拉伸（替代你原来的 percent 逻辑）--------
-    low_p = percent / 2
-    high_p = 100 - percent / 2
-
-    low = np.percentile(mip, low_p)
-    high = np.percentile(mip, high_p)
-
-    mip = np.clip(mip, low, high)
-
-    # -------- 6. 归一化 --------
-    mip = mip - mip.min()
-    mip = mip / (mip.max() + 1e-12)
-
-    # -------- 7. 转 uint8 --------
-    mip = (mip * 255).astype(np.uint8)
-
-    return mip
-'''
+data = Reconstruction532(file_path)
+map = Map(data)
