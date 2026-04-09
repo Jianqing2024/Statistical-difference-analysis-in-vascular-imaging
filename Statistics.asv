@@ -15,6 +15,7 @@ end
 
 Branches = zeros(1,length(txtFiles));
 ABL = zeros(1,length(txtFiles));
+MBL = zeros(1,length(txtFiles));
 
 for i = 1:length(txtFiles)
     T = tableList{i};
@@ -55,28 +56,14 @@ end
 
 Branches = zeros(1,length(txtFiles));
 ABL = zeros(1,length(txtFiles));
-
+MBL = zeros(1,length(txtFiles));
 for i = 1:length(txtFiles)
-    T = tableList{i};
-    Branch = 0;
-    for j = 1:height(T)
-        row = T(i, :);
-
-        Branch = (row.("# Branches"))*(row.("Average Branch Length"));
-        Branches(i) = Branches(i)+Branch;
-    end
+    Branches(i) = sum(tableList{i}.("# Branches"));
+    ABL(i) = mean(tableList{i}.("Average Branch Length"));
+    MBL(i) = mean(tableList{i}.("Maximum Branch Length"));
 end
 
-for i = 1:length(txtFiles)
-    T = tableList{i};
-    Branch = Branches(i);
-    ALL_BL = sum(T.("Average Branch Length"));
-
-    ABL(i) = ALL_BL/Branch;
-end
-
-tumerDATA = [Branches;ABL];
-
+tumerDATA = [Branches;ABL;MBL];
 save tumerDATA.mat tumerDATA
 
 load normalDATA.mat

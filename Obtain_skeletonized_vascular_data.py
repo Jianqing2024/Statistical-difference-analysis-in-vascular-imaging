@@ -69,7 +69,7 @@ current_dir = os.getcwd()
 print(f"当前目录: {current_dir}")
 
 # 目标子文件夹
-folders = ['tumer', 'normal']
+folders = ['Output']
 
 # 用于存放所有文件的列表
 all_files = []
@@ -78,7 +78,7 @@ for folder in folders:
     folder_path = os.path.join(current_dir, folder)
     if os.path.exists(folder_path):
         # 查找该文件夹下所有 .png 文件
-        png_files = glob(os.path.join(folder_path, '*.jpg'))
+        png_files = glob(os.path.join(folder_path, '*.tif'))
         all_files.extend(png_files)  # 添加到总列表
     else:
         print(f"警告: 文件夹不存在 -> {folder_path}")

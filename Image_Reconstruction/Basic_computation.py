@@ -76,7 +76,6 @@ def nonlinear_cuda_style(mip,light=0,percent=50,noise=1e-6,gain=0):
     # -------- 5. 归一化 --------
     mip -= mip.min()
     mip /= (mip.max() + 1e-8)
-
     mip = (mip * 255).astype(cp.uint8)
 
     # 参数
