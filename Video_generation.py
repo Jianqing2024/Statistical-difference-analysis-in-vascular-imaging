@@ -5,10 +5,10 @@ import os
 # =========================
 # 参数设置
 # =========================
-image_folder = "37Bscan_png"     # 图片文件夹路径
-output_path = "37_video.mp4"      # 输出视频
+image_folder = "vedio"     # 图片文件夹路径
+output_path = "video.mp4"      # 输出视频
 fps = 30                        # 帧率
-repeat_frame = 10               # 每张图重复帧数（=1表示不重复）
+repeat_frame = 20               # 每张图重复帧数（=1表示不重复）
 
 # 支持的图片格式
 extensions = ["*.png", "*.jpg", "*.jpeg", "*.tif", "*.tiff"]

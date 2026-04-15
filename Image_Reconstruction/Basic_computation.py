@@ -1,6 +1,36 @@
 import cupy as cp
 from cupyx.scipy.ndimage import median_filter, uniform_filter1d
 import numpy as np
+def hilbert_envelope_gpu(data):
+    """
+    沿 axis=2 (Sample方向) 做 Hilbert 包络
+    """
+    N = data.shape[2]
+
+    # FFT
+    Xf = cp.fft.fft(data, axis=2)
+
+    # 构造 Hilbert 滤波器
+    h = cp.zeros(N, dtype=cp.float32)
+
+    if N % 2 == 0:
+        h[0] = 1
+        h[N//2] = 1
+        h[1:N//2] = 2
+    else:
+        h[0] = 1
+        h[1:(N+1)//2] = 2
+
+    # 应用滤波器
+    Xf = Xf * h[None, None, :]
+
+    # IFFT → analytic signal
+    analytic = cp.fft.ifft(Xf, axis=2)
+
+    # 包络
+    envelope = cp.abs(analytic)
+
+    return envelope
 
 def detect_outliers_std(data, k=10):
     mean = np.mean(data)
@@ -44,6 +74,7 @@ def Enhancement_GPU(data):
     data = detect_outliers_std(data, k=5)
 
     # -------- 2. 5点中值滤波 --------
+    
     data = median_filter(data, size=(1, 1, 5), mode='nearest')
 
     # -------- 3. Wiener（向量化）--------
@@ -68,15 +99,30 @@ def Enhancement_GPU(data):
     # 输出
     data = local_mean + gain * (data - local_mean)
 
-    # -------- 6. 回CPU（可选）--------
+    # -------- 4. 包络检测 --------
+    data = hilbert_envelope_gpu(data)
+
     return cp.asnumpy(data)
+
+def simple_nonlinear(mip, gamma=0.7):
+    mip = mip - mip.min()
+    mip = mip / (mip.max() + 1e-8)
+
+    mip = mip ** gamma   # 非线性增强（核心）
+
+    mip = (mip * 255).astype(np.uint8)
+
+    mip = np.clip(mip, 0, 255)
+
+    return mip.astype(np.uint8)
 
 def nonlinear_cuda_style(mip,light=0,percent=50,noise=1e-6,gain=0):
 
     # -------- 5. 归一化 --------
     mip -= mip.min()
     mip /= (mip.max() + 1e-8)
-    mip = (mip * 255).astype(cp.uint8)
+    #mip = (mip * 255).astype(cp.uint8)
+    mip = mip * 255
 
     # 参数
     k = 0.02 - gain / 10000.0
@@ -90,25 +136,14 @@ def nonlinear_cuda_style(mip,light=0,percent=50,noise=1e-6,gain=0):
     # 非线性 log 压缩（统一log底）
     # -----------------------------
     mip = np.log1p((mip + noise) * k) / np.log1p(k)
-    #print(np.max(mip))
-    #print(np.min(mip))
 
-    # -----------------------------
-    # 对比度拉伸（围绕127）
-    # -----------------------------
-    #mip = 127 + (mip - 127) / a
-
-    # -----------------------------
-    # 裁剪
-    # -----------------------------
     mip -= mip.min()
     mip /= mip.max()
-    mip = (mip * 255).astype(np.uint8)
-    mip = mip + light
+    mip = (mip * 255)
+    mip = (mip + light)
     mip = np.clip(mip, 0, 255)
 
     return mip.astype(np.uint8)
-
 
 '''
 def nonlinear_cuda_style(mip, light=0, percent=50, noise=1e-6, gain=0):
