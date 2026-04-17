@@ -1,5 +1,6 @@
 import numpy as np
 from .Basic_computation import *
+from .Tools import *
 
 def Bscan(data, Range):
     # data为原始数据，range为一列表，标记了所需Bscan的起止索引
@@ -22,7 +23,7 @@ def Slice(data, Range):
     data = Enhancement_GPU(data)
     slice = []
     for i in range(Range[1]-Range[0]):
-        sl = simple_nonlinear(data[:,:,i+Range[0]], gamma=0.7)
+        sl = simple_nonlinear(data[:,:,i+Range[0]], gamma=1.2)
         #sl = nonlinear_cuda_style(data[:,:,i+Range[0]],light=-135)
         slice.append(sl)
     return slice
@@ -36,7 +37,7 @@ def Partial_Map(data, Range, size):
     for l in List:
         data_use = data[:,:,(l[0]-Range[0]):(l[1]-Range[0])]
         map = np.max(data_use, axis=2)
-        map = simple_nonlinear(map, gamma=0.7)
+        map = simple_nonlinear(map, gamma=1.5)
 
         P_Map.append(map)
     return P_Map
@@ -53,16 +54,3 @@ def Deep_Encoding(data, Range):
     map = (map - map.min()) / (map.max() - map.min())
     argmap = (argmap - argmap.min()) / (argmap.max() - argmap.min())
     return map, argmap
-
-######## 工具 ########
-def split_range(start, end, step=2):
-    groups = []
-    for i in range(start, end + 1, step):
-        s = i
-        e = min(i + step - 1, end)
-
-        # 只保留首尾不同的区间
-        if s != e:
-            groups.append([s, e])
-
-    return groups
