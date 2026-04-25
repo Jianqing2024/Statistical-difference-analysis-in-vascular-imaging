@@ -37,7 +37,7 @@ def Partial_Map(data, Range, size):
     for l in List:
         data_use = data[:,:,(l[0]-Range[0]):(l[1]-Range[0])]
         map = np.max(data_use, axis=2)
-        map = simple_nonlinear(map, gamma=1.5)
+        map = simple_nonlinear(map, gamma=2)
 
         P_Map.append(map)
     return P_Map

@@ -20,6 +20,7 @@ def Double_layer_skeletonization(full_path, ij, sigma_min = 2, sigma_large = 8):
     # 输出文件路径
     result_txt = os.path.join(output_folder, f"{base_name}_branch.txt").replace("\\", "/")
     result_tif = os.path.join(output_folder, f"{base_name}_branch.tif").replace("\\", "/")
+    result_tifff = os.path.join(output_folder, f"{base_name}_bra.tif").replace("\\", "/")
     result_den_txt = os.path.join(output_folder, f"{base_name}_density.txt").replace("\\", "/")
     result_den_tif = os.path.join(output_folder, f"{base_name}_density.tif").replace("\\", "/")
 
@@ -48,6 +49,9 @@ def Double_layer_skeletonization(full_path, ij, sigma_min = 2, sigma_large = 8):
 
             // ---- Combine masks ----
             imageCalculator("Max create", "mask_small_copy", "mask_large_copy");
+
+            saveAs("Tiff", "{result_tifff}");
+
             rename("mask_final");
             run("8-bit");
             setThreshold(20, 255);
@@ -58,26 +62,26 @@ def Double_layer_skeletonization(full_path, ij, sigma_min = 2, sigma_large = 8):
 
             saveAs("Tiff", "{result_den_tif}");
             // 设置测量参数
-            //rename("mask_final");
-            //selectWindow("mask_final");
-            //run("Set Scale...", "distance=1 known=1 pixel=1 unit=pixel");
-            //run("Set Measurements...", "area redirect=None decimal=3");
-            //run("Set Measurements...", "area redirect=None decimal=0");
+            rename("mask_final");
+            selectWindow("mask_final");
+            run("Set Scale...", "distance=1 known=1 pixel=1 unit=pixel");
+            run("Set Measurements...", "area redirect=None decimal=3");
+            run("Set Measurements...", "area redirect=None decimal=0");
 
             // 计算所有血管区域面积（并汇总）
-            //run("Analyze Particles...", "size=0-Infinity summarize");
+            run("Analyze Particles...", "size=0-Infinity summarize");
 
             // 导出结果(Summary 里包含 Total Area)
-            //saveAs("Results", "{result_den_txt}");
+            saveAs("Results", "{result_den_txt}");
 
             // ---- Skeleton analysis ----
-            //selectWindow("mask_final");
-            //run("Skeletonize"); 
-            //run("Analyze Skeleton (2D/3D)", "prune=none calculate");
+            selectWindow("mask_final");
+            run("Skeletonize"); 
+            run("Analyze Skeleton (2D/3D)", "prune=none calculate");
 
             // ---- Save ----
-            //saveAs("Results", "{result_txt}"); 
-            //saveAs("Tiff", "{result_tif}");
+            saveAs("Results", "{result_txt}"); 
+            saveAs("Tiff", "{result_tif}");
 
             run("Close All");
             run("Clear Results");
@@ -185,7 +189,7 @@ def Single_layer_skeletonization(full_path, ij, sigma_min):
     """
     ij.py.run_macro(macro_cmd)
 
-def compute_mean_vessel_diameter(binary_mask, skeleton=None, robust=True):
+def compute_mean_vessel_diameter(binary_mask, skeleton):
     """
     计算平均血管直径（基于 distance transform + skeleton）
 
@@ -215,10 +219,7 @@ def compute_mean_vessel_diameter(binary_mask, skeleton=None, robust=True):
         return 0.0
 
     # ===== 处理分叉点偏差（可选稳健模式）=====
-    if robust:
-        radius = np.median(radii)
-    else:
-        radius = np.mean(radii)
+    radius = np.mean(radii)
 
     # ===== diameter =====
     mean_diameter = 2.0 * radius
@@ -230,7 +231,9 @@ def double_layer_skeletonization_py(full_path, sigma_small=2, sigma_large=12, th
     full_path = Path(full_path)
     img = io.imread(full_path)
 
-    img = img[..., 0]  # 转灰度
+    if img.ndim == 3:
+        img = img[..., 0]
+    #img = img[..., 0]  # 转灰度
 
     img = img.astype(np.float32)
     img = (img - img.min()) / (img.max() + 1e-8)
@@ -265,7 +268,6 @@ def double_layer_skeletonization_py(full_path, sigma_small=2, sigma_large=12, th
     mask_large = v_large > 0.1
 
     # ===== 去噪 =====
-    #mask_small = morphology.opening(mask_small, morphology.disk(1))
     mask_small = morphology.remove_small_objects(mask_small, max_size=10)
 
     mask_middle = morphology.closing(mask_middle, morphology.disk(3))
@@ -274,10 +276,10 @@ def double_layer_skeletonization_py(full_path, sigma_small=2, sigma_large=12, th
     mask_large = morphology.opening(mask_large, morphology.disk(1))
     mask_large = morphology.erosion(mask_large, morphology.disk(4))
     mask_large = morphology.remove_small_objects(mask_large, max_size=400)
+    mask_large = binary_fill_holes(mask_large)
 
     # ===== 合并 =====
     merged = np.maximum.reduce([mask_small, mask_middle, mask_large])
-    merged = binary_fill_holes(merged)
 
     # ===== skeleton =====
     skeleton = morphology.skeletonize(merged)
@@ -286,10 +288,10 @@ def double_layer_skeletonization_py(full_path, sigma_small=2, sigma_large=12, th
     # ===== skeleton 分析 =====
     skeleton_stats = summarize(sk, separator='_')
 
-    area = np.sum(merged)                                                                                 # 亮像素数量（血管密度）
-    branch_count = len(skeleton_stats)                                                                    # 分支总数
-    average_branch_length = skeleton_stats["branch_distance"].mean()                                      # 平均分支长度
-    mean_diameter = compute_mean_vessel_diameter(merged, skeleton)                                        # 平均血管直径
+    area = np.sum(merged) / merged.size                                                                                   # 亮像素数量（血管密度）
+    branch_count = len(skeleton_stats)                                                                      # 分支总数
+    average_branch_length = skeleton_stats["branch_distance"].mean()                                        # 平均分支长度
+    mean_diameter = compute_mean_vessel_diameter(merged, skeleton)                                          # 平均血管直径
     tortuosity = (skeleton_stats["branch_distance"] / (skeleton_stats["euclidean_distance"] + 1e-8)).mean() # 曲率
 
     # ===== 保存 =====
@@ -298,5 +300,117 @@ def double_layer_skeletonization_py(full_path, sigma_small=2, sigma_large=12, th
     io.imsave(out_dir / f"middle/{base}_middle.tif", (mask_middle*255).astype(np.uint8))
     io.imsave(out_dir / f"large/{base}_large.tif", (mask_large*255).astype(np.uint8))
     io.imsave(out_dir / f"skeleton/{base}_branch.tif", (skeleton*255).astype(np.uint8))
+
+    return {"area": area, "branch_count": branch_count, "average_branch_length": average_branch_length, "mean_diameter": mean_diameter, "tortuosity": tortuosity}
+
+def double_layer_skeletonization_tem(full_path, sigma_small=2, sigma_large=12, threshold=0.1):
+    # ===== 读取 =====
+    full_path = Path(full_path)
+    img = io.imread(full_path)
+
+    if img.ndim == 3:
+        img = img[..., 0]
+
+    #img = img[..., 0]  # 转灰度
+
+    img = img.astype(np.float32)
+    img = (img - img.min()) / (img.max() + 1e-8)
+    print(type(img))
+    print(img.shape)
+
+    # ===== 输出路径 =====
+    out_dir = full_path.parent / "output_of_skeletonization"
+    out_dir.mkdir(exist_ok=True)
+
+    base = full_path.stem
+
+    # ===== Tubeness (Frangi) =====
+    v_small = filters.frangi(img, sigmas=range(1, 2, 2), black_ridges = False)
+
+    v_middle = filters.frangi(img, sigmas=range(6, 10, 2), black_ridges = False, alpha=0.25, beta=0.25)
+
+    v_large = filters.frangi(img, sigmas=range(12, 16, 2), black_ridges = False, alpha=0.25, beta=0.25)
+    
+    # ===== 二值化 =====
+    mask_small = v_small > 0.1
+    mask_middle = v_middle > 0.1
+    mask_large = v_large > 0.1
+
+    # ===== 去噪 =====
+    mask_small = morphology.remove_small_objects(mask_small, max_size=10)
+
+    mask_middle = morphology.closing(mask_middle, morphology.disk(3))
+    mask_middle = morphology.remove_small_objects(mask_middle, max_size=19)
+
+    mask_large = morphology.opening(mask_large, morphology.disk(1))
+    mask_large = morphology.erosion(mask_large, morphology.disk(4))
+    mask_large = morphology.remove_small_objects(mask_large, max_size=400)
+    mask_large = binary_fill_holes(mask_large)
+
+    # ===== 合并 =====
+    merged = np.maximum.reduce([mask_small, mask_middle, mask_large])
+
+    # ===== skeleton =====
+    skeleton = morphology.skeletonize(merged)
+
+    # ===== 保存 =====
+    io.imsave(out_dir / f"{base}_merged.tif", (merged*255).astype(np.uint8))  
+    io.imsave(out_dir / f"{base}_small.tif", (mask_small*255).astype(np.uint8))
+    io.imsave(out_dir / f"{base}_middle.tif", (mask_middle*255).astype(np.uint8))
+    io.imsave(out_dir / f"{base}_large.tif", (mask_large*255).astype(np.uint8))
+    io.imsave(out_dir / f"{base}_branch.tif", (skeleton*255).astype(np.uint8))
+    
+    io.imsave(out_dir / f"{base}_small_v.tif", (v_small*255).astype(np.uint8))
+    io.imsave(out_dir / f"{base}_middle_v.tif", (v_middle*255).astype(np.uint8))
+    io.imsave(out_dir / f"{base}_large_v.tif", (v_large*255).astype(np.uint8))
+
+def double_layer_skeletonization_statistical_purposes_only(full_path, sigma_small=2, sigma_large=12, threshold=0.1):
+    # ===== 读取 =====
+    full_path = Path(full_path)
+    img = io.imread(full_path)
+
+    img = img[..., 0]  # 转灰度
+
+    img = img.astype(np.float32)
+    img = (img - img.min()) / (img.max() + 1e-8)
+
+    # ===== Tubeness (Frangi) =====
+    v_small = filters.frangi(img, sigmas=range(2, 4, 2), black_ridges = False)
+
+    v_middle = filters.frangi(img, sigmas=range(6, 10, 2), black_ridges = False, alpha=0.25, beta=0.25)
+
+    v_large = filters.frangi(img, sigmas=range(12, 16, 2), black_ridges = False, alpha=0.25, beta=0.25)
+    
+    # ===== 二值化 =====
+    mask_small = v_small > 0.1
+    mask_middle = v_middle > 0.1
+    mask_large = v_large > 0.1
+
+    # ===== 去噪 =====
+    mask_small = morphology.remove_small_objects(mask_small, max_size=10)
+
+    mask_middle = morphology.closing(mask_middle, morphology.disk(3))
+    mask_middle = morphology.remove_small_objects(mask_middle, max_size=19)
+
+    mask_large = morphology.opening(mask_large, morphology.disk(1))
+    mask_large = morphology.erosion(mask_large, morphology.disk(4))
+    mask_large = morphology.remove_small_objects(mask_large, max_size=400)
+    mask_large = binary_fill_holes(mask_large)
+
+    # ===== 合并 =====
+    merged = np.maximum.reduce([mask_small, mask_middle, mask_large])
+
+    # ===== skeleton =====
+    skeleton = morphology.skeletonize(merged)
+    sk = Skeleton(skeleton)
+
+    # ===== skeleton 分析 =====
+    skeleton_stats = summarize(sk, separator='_')
+
+    area = np.sum(merged)                                                                                   # 亮像素数量（血管密度）
+    branch_count = len(skeleton_stats)                                                                      # 分支总数
+    average_branch_length = skeleton_stats["branch_distance"].mean()                                        # 平均分支长度
+    mean_diameter = compute_mean_vessel_diameter(merged, skeleton)                                          # 平均血管直径
+    tortuosity = (skeleton_stats["branch_distance"] / (skeleton_stats["euclidean_distance"] + 1e-8)).mean() # 曲率
 
     return {"area": area, "branch_count": branch_count, "average_branch_length": average_branch_length, "mean_diameter": mean_diameter, "tortuosity": tortuosity}

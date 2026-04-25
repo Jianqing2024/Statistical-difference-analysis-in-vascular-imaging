@@ -109,10 +109,9 @@ def simple_nonlinear(mip, gamma=0.7):
     mip = mip - mip.min()
     mip = mip / (mip.max() + 1e-8)
 
-    mip = mip ** gamma   # 非线性增强（核心）
+    mip = mip ** gamma   # 非线性增强
 
     mip = (mip * 255).astype(np.uint8)
-
     mip = np.clip(mip, 0, 255)
 
     return mip.astype(np.uint8)

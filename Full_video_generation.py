@@ -17,14 +17,13 @@ def pic(input_folder, output_folder, font):
         key=lambda x: int(''.join(filter(str.isdigit, x)))  # 提取文件名中的数字排序
     )
 
-    bar_length_px = 58      # scale bar长度（像素）
-    bar_thickness = 5       # 线宽
-    margin = 15             # 边距
+    bar_length_px = 91      # scale bar长度（像素）
+    bar_thickness = 10       # 线宽
+    margin = 50              # 边距
 
     for idx, filename in enumerate(image_files, start=1):
         img_path = os.path.join(input_folder, filename)
         img = Image.open(img_path).convert("RGB")
-        img = img.rotate(-90, expand=True)
         
         draw = ImageDraw.Draw(img)
         
@@ -60,7 +59,7 @@ def pic(input_folder, output_folder, font):
         sw = bbox2[2] - bbox2[0]
         sh = bbox2[3] - bbox2[1]
         
-        text2_x = bar_x1 + (bar_length_px - sw) // 2-40
+        text2_x = bar_x1 + (bar_length_px - sw) // 2-20
         text2_y = bar_y1 - sh - 30  # 在线上方
         
         draw.text((text2_x + 2, text2_y + 2), scale_text, font=font, fill=shadow_color)
@@ -113,9 +112,9 @@ print(len(all_files_A))
 
 for j in range(len(all_files_A)):
     # 假设是你的图片路径列表
-    image_files = [f'd:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\A\\{j+1}.tif', 
-                   f'd:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\B\\{j+1}.tif', 
-                   f'd:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\C\\{j+1}.tif']
+    image_files = [f'd:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\A\\{j}.tif', 
+                   f'd:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\B\\{j}.tif', 
+                   f'd:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\C\\{j}.tif']
 
 
     # 读取所有图片
@@ -186,7 +185,7 @@ for j in range(len(all_files_A)):
 image_folder = "vedio"     # 图片文件夹路径
 output_path = "vedio\\video.mp4"      # 输出视频
 fps = 30                        # 帧率
-repeat_frame = 20               # 每张图重复帧数（=1表示不重复）
+repeat_frame = 5               # 每张图重复帧数（=1表示不重复）
 
 # 支持的图片格式
 extensions = ["*.png", "*.jpg", "*.jpeg", "*.tif", "*.tiff"]

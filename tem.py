@@ -19,14 +19,14 @@ def pic(input_folder, output_folder, font):
     else:
         print(f"警告: 文件夹不存在 -> {input_folder}")
 
-    bar_length_px = 167      # scale bar长度（像素）
-    bar_thickness = 5       # 线宽
+    bar_length_px = 58*2      # scale bar长度（像素）
+    bar_thickness = 15       # 线宽
     margin = 15             # 边距
 
     for idx, filename in enumerate(image_files, start=1):
         img_path = os.path.join(input_folder, filename)
         img = Image.open(img_path).convert("RGB")
-        img = img.rotate(-90, expand=True)
+        #img = img.rotate(-90, expand=True)
         
         draw = ImageDraw.Draw(img)
         
@@ -56,14 +56,14 @@ def pic(input_folder, output_folder, font):
         )
         
         # ========= 可选：scale文字 =========
-        scale_text = "1 mm"   # 你自己定义
+        scale_text = "2 mm"   # 你自己定义
         
         bbox2 = font.getbbox(scale_text)
         sw = bbox2[2] - bbox2[0]
         sh = bbox2[3] - bbox2[1]
         
-        text2_x = bar_x1 + (bar_length_px - sw) // 2-5
-        text2_y = bar_y1 - sh - 30  # 在线上方
+        text2_x = bar_x1 + (bar_length_px - sw) // 2 -20
+        text2_y = bar_y1 - sh - 50  # 在线上方
         
         draw.text((text2_x + 2, text2_y + 2), scale_text, font=font, fill=shadow_color)
         draw.text((text2_x, text2_y), scale_text, font=font, fill=text_color)
@@ -79,7 +79,7 @@ def pic(input_folder, output_folder, font):
 
     print("All images processed!")
 
-font_size = 40  # 字体大小
+font_size = 80  # 字体大小
 try:
     # Windows 和 macOS 通常自带 Times New Roman
     font = ImageFont.truetype("times.ttf", font_size)  # Windows
@@ -92,4 +92,4 @@ except:
         print("Times New Roman 字体未找到，使用默认字体。")
         font = ImageFont.load_default()  # 备用字体
 
-pic("E:\\2-英文\\9 - 副本", "E:\\2-英文\\9 - 副本", font)
+pic("E:\\2-英文\\5-补充材料-视频\\deep - 副本", "E:\\2-英文\\5-补充材料-视频\\deep - 副本", font)

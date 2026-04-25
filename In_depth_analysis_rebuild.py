@@ -21,23 +21,23 @@ else:
     print(f"警告: 文件夹不存在 -> {Temporary_path}")
 
 for file in tqdm(all_files):
-#file = "D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\Installments\\data\\14data1.npy"
 
     data = np.load(file)
 
-    pmap = ir.Partial_Map(data, range1, 3)
+    #pmap = ir.Partial_Map(data, range1, 3)
+    slice = ir.Slice(data, range1)
 
     filename = os.path.splitext(os.path.basename(file))[0]
 
     cwd = os.getcwd()
-    save_dir = os.path.join(cwd, "Output", 'pmap', filename)
+    save_dir = os.path.join(cwd, "Output", 'slice', filename)
     os.makedirs(save_dir, exist_ok=True)
 
-    for i, s in enumerate(pmap):
+    for i, s in enumerate(slice):
         plt.figure(figsize=(4,5))
         plt.axis('off')
 
-        plt.imshow(s, cmap='gist_heat', aspect='auto')
+        plt.imshow(s, cmap='gist_heat', aspect='auto', vmin=0, vmax=255)
         plt.savefig(os.path.join(save_dir, f"pmap_{i+range1[0]:03d}.tif"),
                     dpi=300,
                     bbox_inches='tight',
