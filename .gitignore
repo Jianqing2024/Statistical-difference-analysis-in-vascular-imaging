@@ -12,3 +12,4 @@ __pycache__/
 *.cu
 *.tiff
 *.ai
+Image_Reconstruction/Basic_computation.py

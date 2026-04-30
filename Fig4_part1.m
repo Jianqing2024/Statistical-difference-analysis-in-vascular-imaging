@@ -37,7 +37,7 @@ f1.Position = [24, 12, 10, 10];
 
 ax1 = axes;
 ax1.Units = 'centimeters';
-ax1.Position = [1,1,2.5,2.5];
+ax1.Position = [1,1,1.7,1.7];
 
 hold on
 b1 = bar([mean([standard(1:251); standard(351:551); standard(1151:1301)]), mean(data_37_ROI)]);
@@ -79,11 +79,11 @@ axis square
 ax1.XLim = [0, 3];
 ax1.YLim = [0, 1.45];
 ax1.XTick = [1,2];
-ax1.XTickLabel = {'Standard', 'AOM/DSS'};
+ax1.XTickLabel = {'', 'AOM/DSS'};
 ax1.TickLength = [0.025,1];
-xtickangle(ax1, 20);
-title('Thickness (mm)')
-ax1.FontSize = 8;
+ylabel('Thickness (mm)')
+ax1.FontSize = 6;
+ax1.XTickLabelRotation = 0;
 
 %%
 f2 = figure(2);
@@ -93,7 +93,7 @@ f2.Position = [24, 12, 10, 10];
 
 ax2 = axes;
 ax2.Units = 'centimeters';
-ax2.Position = [1,1,2.5,2.5];
+ax2.Position = [1,1,1.7,1.7];
 
 hold on
 
@@ -136,11 +136,10 @@ axis square
 ax2.XLim = [0, 3];
 ax2.YLim = [0, 1.45];
 ax2.XTick = [1,2];
-ax2.XTickLabel = {'Standard', 'CT26'};
+ax2.XTickLabel = {'', 'CT26'};
 ax2.TickLength = [0.025,1];
-xtickangle(ax2, 20);
-title('Thickness (mm)')
-ax2.FontSize = 8;
+ylabel('Thickness (mm)')
+ax2.FontSize = 6;
 
 %%
 f3 = figure(3);
@@ -150,7 +149,7 @@ f3.Position = [24, 12, 10, 10];
 
 ax3 = axes;
 ax3.Units = 'centimeters';
-ax3.Position = [1,1,2.5,2.5];
+ax3.Position = [1,1,1.7,1.7];
 
 hold on
 b3 = bar([mean(standard(1:150)), mean(data_nor2(1:150))]);
@@ -192,8 +191,7 @@ axis square
 ax3.XLim = [0, 3];
 ax3.YLim = [0, 1.45];
 ax3.XTick = [1,2];
-ax3.XTickLabel = {'Standard', 'HC'};
+ax3.XTickLabel = {'', 'HC'};
 ax3.TickLength = [0.025,1];
-xtickangle(ax3, 20);
-title('Thickness (mm)')
-ax3.FontSize = 8;
+ylabel('Thickness (mm)')
+ax3.FontSize = 6;

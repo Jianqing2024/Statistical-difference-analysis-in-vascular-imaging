@@ -1,7 +1,6 @@
 from glob import glob
 from PIL import Image, ImageDraw, ImageFont
 import os
-import cv2
 
 def pic(input_folder, output_folder, font):
 
@@ -19,14 +18,15 @@ def pic(input_folder, output_folder, font):
     else:
         print(f"警告: 文件夹不存在 -> {input_folder}")
 
-    bar_length_px = 58*2      # scale bar长度（像素）
-    bar_thickness = 15       # 线宽
-    margin = 15             # 边距
+    print(image_files)
 
-    for idx, filename in enumerate(image_files, start=1):
-        img_path = os.path.join(input_folder, filename)
+    bar_length_px = 58      # scale bar长度（像素）
+    bar_thickness = 15      # 线宽
+    margin = 25             # 边距
+
+    for idx, img_path in enumerate(image_files, start=1):
         img = Image.open(img_path).convert("RGB")
-        #img = img.rotate(-90, expand=True)
+        img = img.rotate(-90, expand=True)
         
         draw = ImageDraw.Draw(img)
         
@@ -56,7 +56,8 @@ def pic(input_folder, output_folder, font):
         )
         
         # ========= 可选：scale文字 =========
-        scale_text = "2 mm"   # 你自己定义
+        '''
+        scale_text = "1 mm"   # 你自己定义
         
         bbox2 = font.getbbox(scale_text)
         sw = bbox2[2] - bbox2[0]
@@ -67,14 +68,13 @@ def pic(input_folder, output_folder, font):
         
         draw.text((text2_x + 2, text2_y + 2), scale_text, font=font, fill=shadow_color)
         draw.text((text2_x, text2_y), scale_text, font=font, fill=text_color)
+        '''
 
         # 保存
+        filename = os.path.basename(img_path)
         output_path = os.path.join(output_folder, filename)
         img.save(output_path)
-        
-        # 保存图片
-        output_path = os.path.join(output_folder, filename)
-        img.save(output_path)
+
         print(f"Processed: {filename} -> {output_path}")
 
     print("All images processed!")
@@ -92,4 +92,4 @@ except:
         print("Times New Roman 字体未找到，使用默认字体。")
         font = ImageFont.load_default()  # 备用字体
 
-pic("E:\\2-英文\\5-补充材料-视频\\deep - 副本", "E:\\2-英文\\5-补充材料-视频\\deep - 副本", font)
+pic("D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\SCA", "D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\scale_bar_2", font)

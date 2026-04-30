@@ -23,7 +23,7 @@ T = cell(3,1);
 for i = 1:n
     file_path = fullfile(files(i).folder, files(i).name);
     T{i} = readtable(file_path); % 1AOM 2CT26 3HC
-    T{i} = T{i}(:, 2:end);  
+    T{i} = T{i}(:, 2:end);
 end
 
 % --- 定义组名 ---
@@ -96,19 +96,19 @@ for i = 1:numParams
 end
 disp(Results)
 
-x = {'AOM/DSS', 'CT26', 'HC'};
+x = {'HC', 'CT26', 'AOM/DSS'};
 
 unit = 11.69; % um
 
-VD = table(T{1}{:,1}*100, T{2}{:,1}*100, T{3}{:,1}*100, 'VariableNames', x);           % 不改
-Branches = table(T{1}{:,2}, T{2}{:,2}, T{3}{:,2}, 'VariableNames', x);     % 不改
-ABL = table(T{1}{:,3}*unit, T{2}{:,3}*unit, T{3}{:,3}*unit, 'VariableNames', x);
-MD = table(T{1}{:,4}*unit, T{2}{:,4}*unit, T{3}{:,4}*unit, 'VariableNames', x);
+VD = table(T{3}{:,1}*100, T{2}{:,1}*100, T{1}{:,1}*100, 'VariableNames', x);           % 不改
+Branches = table(T{3}{:,2}, T{2}{:,2}, T{1}{:,2}, 'VariableNames', x);     % 不改
+ABL = table(T{3}{:,3}*unit, T{2}{:,3}*unit, T{1}{:,3}*unit, 'VariableNames', x);
+MD = table(T{3}{:,4}*unit, T{2}{:,4}*unit, T{1}{:,4}*unit, 'VariableNames', x);
 
 f1 = figure(1);
 f1.Color = 'w';
 f1.Units = "centimeters";
-f1.Position = [24, 12, 19, 8];
+f1.Position = [24, 12, 15, 7];
 
 t = tiledlayout(2, 5);
 t.TileSpacing = "compact";
@@ -116,70 +116,70 @@ t.Padding = "compact";
 
 ax1 = nexttile(1);
 hold on
-v1 = violinplot(VD,["AOM/DSS","CT26","HC"]);
-v1(1).FaceColor = color_of_AOM;
+v1 = violinplot(VD, x);
+v1(3).FaceColor = color_of_AOM;
 v1(2).FaceColor = color_of_CT26;
-v1(3).FaceColor = color_of_HC;
+v1(1).FaceColor = color_of_HC;
 ylabel('VD (%)')
 
-errorbar(1,Results{1, 2}*100,Results{1, 5}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(3,Results{1, 2}*100,Results{1, 5}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 errorbar(2,Results{1, 3}*100,Results{1, 6}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(3,Results{1, 4}*100,Results{1, 7}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(1,Results{1, 4}*100,Results{1, 7}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
 ax1.XTickLabel = x;
 ax1.XTick = [1, 2, 3];
-ax1.FontSize = 8;
+ax1.FontSize = 6;
 
 ax2 = nexttile(2);
 hold on
-v2 = violinplot(Branches,["AOM/DSS","CT26","HC"]);
-v2(1).FaceColor = color_of_AOM;
+v2 = violinplot(Branches,x);
+v2(3).FaceColor = color_of_AOM;
 v2(2).FaceColor = color_of_CT26;
-v2(3).FaceColor = color_of_HC;
+v2(1).FaceColor = color_of_HC;
 ylabel('BN')
 
-errorbar(1,Results{2, 2},Results{2, 5}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(3,Results{2, 2},Results{2, 5}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 errorbar(2,Results{2, 3},Results{2, 6}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(3,Results{2, 4},Results{2, 7}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(1,Results{2, 4},Results{2, 7}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
 ax2.XTickLabel = x;
 ax2.XTick = [1, 2, 3];
 ax2.YTick = [0, 2000, 4000, 6000];
 ax2.YAxis.Exponent = 3;
-ax2.FontSize = 8;
+ax2.FontSize = 6;
 
 ax6 = nexttile(6);
 hold on
-v3 = violinplot(ABL,["AOM/DSS","CT26","HC"]);
+v3 = violinplot(ABL,x);
 xticklabels(x);
-v3(1).FaceColor = color_of_AOM;
+v3(3).FaceColor = color_of_AOM;
 v3(2).FaceColor = color_of_CT26;
-v3(3).FaceColor = color_of_HC;
+v3(1).FaceColor = color_of_HC;
 ylabel('ABL (μm)')
 
-errorbar(1,Results{3, 2}*unit,Results{3, 5}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(3,Results{3, 2}*unit,Results{3, 5}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 errorbar(2,Results{3, 3}*unit,Results{3, 6}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(3,Results{3, 4}*unit,Results{3, 7}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(1,Results{3, 4}*unit,Results{3, 7}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
 ax6.XTickLabel = x;
 ax6.XTick = [1, 2, 3];
-ax6.FontSize = 8;
+ax6.FontSize = 6;
 
 ax7 = nexttile(7);
 hold on
-v4 = violinplot(MD,["AOM/DSS","CT26","HC"]);
-v4(1).FaceColor = color_of_AOM;
+v4 = violinplot(MD,x);
+v4(3).FaceColor = color_of_AOM;
 v4(2).FaceColor = color_of_CT26;
-v4(3).FaceColor = color_of_HC;
+v4(1).FaceColor = color_of_HC;
 ylabel('AVD (μm)')
 
-errorbar(1,Results{4, 2}*unit,Results{4, 5}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(3,Results{4, 2}*unit,Results{4, 5}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 errorbar(2,Results{4, 3}*unit,Results{4, 6}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(3,Results{4, 4}*unit,Results{4, 7}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(1,Results{4, 4}*unit,Results{4, 7}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
 ax7.XTickLabel = x;
 ax7.XTick = [1, 2, 3];
-ax7.FontSize = 8;
+ax7.FontSize = 6;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
 T_area = readtable("area.xlsx", VariableNamingRule ="preserve");
@@ -231,7 +231,7 @@ for i = 1:n
 end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
-x = linspace(220, 309, 90)*7.5e-3;
+x = (linspace(220, 309, 90)-175)*7.5e-3;
 y_tem = ones(1, 100)*1.1;
 
 ax3 = nexttile(3);
@@ -245,10 +245,11 @@ plot(x, T_area.AOM_mean/(930*1155)*100, 'Color', color_of_AOM)
 plot(x, T_area.CT26_mean/(930*1155)*100, 'Color', color_of_CT26)
 hold off
 ax3.XLim = [x(1), x(end)];
-ax3.XTick = [1.8, 2, 2.2];
+ax3.XTick = [0.5, 0.75, 1.0];
+ax3.XTickLabel = {'0.5', '0.75', '1.0'};
 xlabel('Depth (mm)')
 ylabel('VD (%)')
-ax3.FontSize = 8;
+ax3.FontSize = 6;
 
 ax4 = nexttile(4);
 hold on
@@ -261,12 +262,13 @@ plot(x, T_branch_count.AOM_mean, 'Color', color_of_AOM)
 plot(x, T_branch_count.CT26_mean, 'Color', color_of_CT26)
 hold off
 ax4.XLim = [x(1), x(end)];
-ax4.XTick = [1.8, 2, 2.2];
+ax4.XTick = [0.5, 0.75, 1.0];
+ax4.XTickLabel = {'0.5', '0.75', '1.0'};
 ax4.YLim = [0, 8e3];
 ax4.YAxis.Exponent = 3;
 xlabel('Depth (mm)')
 ylabel('BN')
-ax4.FontSize = 8;
+ax4.FontSize = 6;
 
 ax5 = nexttile(5);
 hold on
@@ -279,10 +281,11 @@ plot(x, T_mean_diameter.AOM_mean*unit, 'Color', color_of_AOM)
 plot(x, T_mean_diameter.CT26_mean*unit, 'Color', color_of_CT26)
 hold off
 ax5.XLim = [x(1), x(end)];
-ax5.XTick = [1.8, 2, 2.2];
+ax5.XTick = [0.5, 0.75, 1.0];
+ax5.XTickLabel = {'0.5', '0.75', '1.0'};
 xlabel('Depth (mm)')
 ylabel('AVD (μm)')
-ax5.FontSize = 8;
+ax5.FontSize = 6;
 
 ax8 = nexttile(8);
 hold on
@@ -301,12 +304,13 @@ hold off
 grid on
 box on
 ax8.XLim = [x(1), x(end)];
-ax8.XTick = [1.8, 2, 2.2];
+ax8.XTick = [0.5, 0.75, 1.0];
+ax8.XTickLabel = {'0.5', '0.75', '1.0'};
 ax8.YTick = [0.25, 0.75];
 ax8.YLim = [0, 1.05];
 ylabel('p-value')
 xlabel('Depth (mm)')
-ax8.FontSize = 8;
+ax8.FontSize = 6;
 
 ax9 = nexttile(9);
 hold on
@@ -323,12 +327,13 @@ hold off
 grid on
 box on
 ax9.XLim = [x(1), x(end)];
-ax9.XTick = [1.8, 2, 2.2];
+ax9.XTick = [0.5, 0.75, 1.0];
+ax9.XTickLabel = {'0.5', '0.75', '1.0'};
 ax9.YTick = [0.25, 0.75];
 ax9.YLim = [0, 1.05];
 ylabel('p-value')
 xlabel('Depth (mm)')
-ax9.FontSize = 8;
+ax9.FontSize = 6;
 
 ax10 = nexttile(10);
 hold on
@@ -342,9 +347,10 @@ hold off
 grid on
 box on
 ax10.XLim = [x(1), x(end)];
-ax10.XTick = [1.8, 2, 2.2];
+ax10.XTick = [0.5, 0.75, 1.0];
+ax10.XTickLabel = {'0.5', '0.75', '1.0'};
 ax10.YTick = [0.25, 0.75];
 ax10.YLim = [0, 1.05];
 ylabel('p-value')
 xlabel('Depth (mm)')
-ax10.FontSize = 8;
+ax10.FontSize = 6;
