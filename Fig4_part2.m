@@ -5,15 +5,15 @@ set(groot, ...
     'defaultTextFontName','Arial', ...
     'defaultLegendFontName','Arial');
 
-% color_of_AOM = '#d34a24';
-% color_of_CT26 = '#3c7f72';
-% color_of_HC = '#ffaf00';
-% color_of_Error = '#566071';
-
-color_of_AOM = '#bd3d3f';
-color_of_CT26 = '#104b51';
-color_of_HC = '#674448';
+color_of_AOM = '#d34a24';
+color_of_CT26 = '#3c7f72';
+color_of_HC = '#ffaf00';
 color_of_Error = '#566071';
+
+% color_of_AOM = '#bd3d3f';
+% color_of_CT26 = '#104b51';
+% color_of_HC = '#674448';
+% color_of_Error = '#566071';
 
 folder = 'D:\WORK\Statistical-difference-analysis-in-vascular-imaging\Output\slice';
 
@@ -78,15 +78,32 @@ for i = 1:numParams
     Results{i, 8} = p12;      
     Results{i, 9} = p13;      
     Results{i, 10} = p23;
+
+    % da = [ ...
+    %     data1; ...
+    %     data2; ...
+    %     data3 ...
+    %     ];
+    % 
+    % group = [ ...
+    %     repmat("G1", numel(data1), 1); ...
+    %     repmat("G2", numel(data2), 1); ...
+    %     repmat("G3", numel(data3), 1) ...
+    % ];
+    % 
+    % [p, tbl, stats] = anova1(da, group);
+    % multcompare(stats)
 end
 disp(Results)
 
 x = {'AOM/DSS', 'CT26', 'HC'};
 
-VD = table(T{1}{:,1}, T{2}{:,1}, T{3}{:,1}, 'VariableNames', x);
-Branches = table(T{1}{:,2}, T{2}{:,2}, T{3}{:,2}, 'VariableNames', x);
-ABL = table(T{1}{:,3}, T{2}{:,3}, T{3}{:,3}, 'VariableNames', x);
-MD = table(T{1}{:,4}, T{2}{:,4}, T{3}{:,4}, 'VariableNames', x);
+unit = 11.69; % um
+
+VD = table(T{1}{:,1}*100, T{2}{:,1}*100, T{3}{:,1}*100, 'VariableNames', x);           % 不改
+Branches = table(T{1}{:,2}, T{2}{:,2}, T{3}{:,2}, 'VariableNames', x);     % 不改
+ABL = table(T{1}{:,3}*unit, T{2}{:,3}*unit, T{3}{:,3}*unit, 'VariableNames', x);
+MD = table(T{1}{:,4}*unit, T{2}{:,4}*unit, T{3}{:,4}*unit, 'VariableNames', x);
 
 f1 = figure(1);
 f1.Color = 'w';
@@ -94,67 +111,75 @@ f1.Units = "centimeters";
 f1.Position = [24, 12, 19, 8];
 
 t = tiledlayout(2, 5);
-t.TileSpacing = "tight";
+t.TileSpacing = "compact";
 t.Padding = "compact";
 
-nexttile(1)
+ax1 = nexttile(1);
 hold on
 v1 = violinplot(VD,["AOM/DSS","CT26","HC"]);
-xticklabels(x);
 v1(1).FaceColor = color_of_AOM;
 v1(2).FaceColor = color_of_CT26;
 v1(3).FaceColor = color_of_HC;
-ylabel('VD')
+ylabel('VD (%)')
 
-errorbar(1,Results{1, 2},Results{1, 5}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(2,Results{1, 3},Results{1, 6}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(3,Results{1, 4},Results{1, 7}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(1,Results{1, 2}*100,Results{1, 5}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(2,Results{1, 3}*100,Results{1, 6}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(3,Results{1, 4}*100,Results{1, 7}*100, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
+ax1.XTickLabel = x;
+ax1.XTick = [1, 2, 3];
+ax1.FontSize = 8;
 
-nexttile(2)
+ax2 = nexttile(2);
 hold on
 v2 = violinplot(Branches,["AOM/DSS","CT26","HC"]);
-xticklabels(x);
 v2(1).FaceColor = color_of_AOM;
 v2(2).FaceColor = color_of_CT26;
 v2(3).FaceColor = color_of_HC;
 ylabel('BN')
-yticks([0, 2000, 4000, 6000])
 
 errorbar(1,Results{2, 2},Results{2, 5}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 errorbar(2,Results{2, 3},Results{2, 6}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 errorbar(3,Results{2, 4},Results{2, 7}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
+ax2.XTickLabel = x;
+ax2.XTick = [1, 2, 3];
+ax2.YTick = [0, 2000, 4000, 6000];
+ax2.YAxis.Exponent = 3;
+ax2.FontSize = 8;
 
-nexttile(6)
+ax6 = nexttile(6);
 hold on
 v3 = violinplot(ABL,["AOM/DSS","CT26","HC"]);
 xticklabels(x);
 v3(1).FaceColor = color_of_AOM;
 v3(2).FaceColor = color_of_CT26;
 v3(3).FaceColor = color_of_HC;
-ylabel('ABL')
-yticks([6, 8, 10, 12, 14])
+ylabel('ABL (μm)')
 
-errorbar(1,Results{3, 2},Results{3, 5}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(2,Results{3, 3},Results{3, 6}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(3,Results{3, 4},Results{3, 7}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(1,Results{3, 2}*unit,Results{3, 5}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(2,Results{3, 3}*unit,Results{3, 6}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(3,Results{3, 4}*unit,Results{3, 7}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
+ax6.XTickLabel = x;
+ax6.XTick = [1, 2, 3];
+ax6.FontSize = 8;
 
-nexttile(7)
+ax7 = nexttile(7);
 hold on
 v4 = violinplot(MD,["AOM/DSS","CT26","HC"]);
-xticklabels(x);
 v4(1).FaceColor = color_of_AOM;
 v4(2).FaceColor = color_of_CT26;
 v4(3).FaceColor = color_of_HC;
-ylabel('AVD')
-yticks([4, 5, 6, 7, 8])
+ylabel('AVD (μm)')
 
-errorbar(1,Results{4, 2},Results{4, 5}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(2,Results{4, 3},Results{4, 6}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
-errorbar(3,Results{4, 4},Results{4, 7}, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(1,Results{4, 2}*unit,Results{4, 5}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(2,Results{4, 3}*unit,Results{4, 6}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
+errorbar(3,Results{4, 4}*unit,Results{4, 7}*unit, 'Marker', "square", 'MarkerFaceColor', color_of_Error, 'Color', color_of_Error, 'MarkerSize', 4)
 hold off
+ax7.XTickLabel = x;
+ax7.XTick = [1, 2, 3];
+ax7.FontSize = 8;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
 T_area = readtable("area.xlsx", VariableNamingRule ="preserve");
@@ -206,23 +231,26 @@ for i = 1:n
 end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
-x = linspace(220, 309, 90);
+x = linspace(220, 309, 90)*7.5e-3;
 y_tem = ones(1, 100)*1.1;
 
-nexttile(3)
+ax3 = nexttile(3);
 hold on
-fill([x, fliplr(x)], [(max_mat_AOM(:,1)')/(930*1155), fliplr(min_mat_AOM(:,1)')/(930*1155)],...
+fill([x, fliplr(x)], [(max_mat_AOM(:,1)')/(930*1155)*100, fliplr(min_mat_AOM(:,1)')/(930*1155)*100],...
     hex2rgb(color_of_AOM), 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-fill([x, fliplr(x)], [(max_mat_CT26(:,1)')/(930*1155), fliplr(min_mat_CT26(:,1)')/(930*1155)],...
+fill([x, fliplr(x)], [(max_mat_CT26(:,1)')/(930*1155)*100, fliplr(min_mat_CT26(:,1)')/(930*1155)*100],...
     hex2rgb(color_of_CT26), 'FaceAlpha', 0.2, 'EdgeColor', 'none');
 
-plot(x, T_area.AOM_mean/(930*1155), 'Color', color_of_AOM)
-plot(x, T_area.CT26_mean/(930*1155), 'Color', color_of_CT26)
+plot(x, T_area.AOM_mean/(930*1155)*100, 'Color', color_of_AOM)
+plot(x, T_area.CT26_mean/(930*1155)*100, 'Color', color_of_CT26)
 hold off
-title('VD')
-xlim([220, 310])
+ax3.XLim = [x(1), x(end)];
+ax3.XTick = [1.8, 2, 2.2];
+xlabel('Depth (mm)')
+ylabel('VD (%)')
+ax3.FontSize = 8;
 
-nexttile(4)
+ax4 = nexttile(4);
 hold on
 fill([x, fliplr(x)], [(max_mat_AOM(:,2)'), fliplr(min_mat_AOM(:,2)')],...
     hex2rgb(color_of_AOM), 'FaceAlpha', 0.2, 'EdgeColor', 'none');
@@ -232,25 +260,31 @@ fill([x, fliplr(x)], [(max_mat_CT26(:,2)'), fliplr(min_mat_CT26(:,2)')],...
 plot(x, T_branch_count.AOM_mean, 'Color', color_of_AOM)
 plot(x, T_branch_count.CT26_mean, 'Color', color_of_CT26)
 hold off
-title('NB')
-xlim([220, 310])
-yticks([2000, 4000, 6000, 8000])
+ax4.XLim = [x(1), x(end)];
+ax4.XTick = [1.8, 2, 2.2];
+ax4.YLim = [0, 8e3];
+ax4.YAxis.Exponent = 3;
+xlabel('Depth (mm)')
+ylabel('BN')
+ax4.FontSize = 8;
 
-nexttile(5)
+ax5 = nexttile(5);
 hold on
-fill([x, fliplr(x)], [(max_mat_AOM(:,4)'), fliplr(min_mat_AOM(:,4)')],...
+fill([x, fliplr(x)], [(max_mat_AOM(:,4)')*unit, fliplr(min_mat_AOM(:,4)')*unit],...
     hex2rgb(color_of_AOM), 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-fill([x, fliplr(x)], [(max_mat_CT26(:,4)'), fliplr(min_mat_CT26(:,4)')],...
+fill([x, fliplr(x)], [(max_mat_CT26(:,4)')*unit, fliplr(min_mat_CT26(:,4)')*unit],...
     hex2rgb(color_of_CT26), 'FaceAlpha', 0.2, 'EdgeColor', 'none');
 
-plot(x, T_mean_diameter.AOM_mean, 'Color', color_of_AOM)
-plot(x, T_mean_diameter.CT26_mean, 'Color', color_of_CT26)
+plot(x, T_mean_diameter.AOM_mean*unit, 'Color', color_of_AOM)
+plot(x, T_mean_diameter.CT26_mean*unit, 'Color', color_of_CT26)
 hold off
-title('AVD')
-xlim([220, 310])
-ylim([1, 8])
+ax5.XLim = [x(1), x(end)];
+ax5.XTick = [1.8, 2, 2.2];
+xlabel('Depth (mm)')
+ylabel('AVD (μm)')
+ax5.FontSize = 8;
 
-nexttile(8)
+ax8 = nexttile(8);
 hold on
 area(x, T_area.p_fdr, 'FaceColor', '#9eafbf', 'FaceAlpha', 0.25, 'EdgeColor', 'none')
 plot(x, T_area.p_fdr, 'LineWidth', 1, 'Color', '#406682')
@@ -266,12 +300,15 @@ area(x(idx), y_tem(idx), 'FaceColor', '#566071', 'FaceAlpha', 0.5);
 hold off
 grid on
 box on
-xlim([220, 310])
-ylim([0, 1.05])
-xticks([220, 260, 300])
-yticks([0.25, 0.5, 0.75, 1])
+ax8.XLim = [x(1), x(end)];
+ax8.XTick = [1.8, 2, 2.2];
+ax8.YTick = [0.25, 0.75];
+ax8.YLim = [0, 1.05];
+ylabel('p-value')
+xlabel('Depth (mm)')
+ax8.FontSize = 8;
 
-nexttile(9)
+ax9 = nexttile(9);
 hold on
 area(x, T_branch_count.p_fdr, 'FaceColor', '#9eafbf', 'FaceAlpha', 0.25, 'EdgeColor', 'none')
 
@@ -285,12 +322,15 @@ area(x(idx), y_tem(idx), 'FaceColor', '#566071', 'FaceAlpha', 0.5);
 hold off
 grid on
 box on
-xlim([220, 310])
-ylim([0, 1.05])
-xticks([220, 260, 300])
-yticks([0.25, 0.5, 0.75, 1])
+ax9.XLim = [x(1), x(end)];
+ax9.XTick = [1.8, 2, 2.2];
+ax9.YTick = [0.25, 0.75];
+ax9.YLim = [0, 1.05];
+ylabel('p-value')
+xlabel('Depth (mm)')
+ax9.FontSize = 8;
 
-nexttile(10)
+ax10 = nexttile(10);
 hold on
 area(x, T_mean_diameter.p_fdr, 'FaceColor', '#9eafbf', 'FaceAlpha', 0.25, 'EdgeColor', 'none')
 
@@ -301,7 +341,10 @@ area(x(idx), y_tem(idx), 'FaceColor', '#566071', 'FaceAlpha', 0.5);
 hold off
 grid on
 box on
-xlim([220, 310])
-ylim([0, 1.05])
-xticks([220, 260, 300])
-yticks([0.25, 0.5, 0.75, 1])
+ax10.XLim = [x(1), x(end)];
+ax10.XTick = [1.8, 2, 2.2];
+ax10.YTick = [0.25, 0.75];
+ax10.YLim = [0, 1.05];
+ylabel('p-value')
+xlabel('Depth (mm)')
+ax10.FontSize = 8;
