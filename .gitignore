@@ -12,4 +12,7 @@ __pycache__/
 *.cu
 *.tiff
 *.ai
-Image_Reconstruction/Basic_computation.py
+*.zip
+*.doc
+*.docx
+*.pdf

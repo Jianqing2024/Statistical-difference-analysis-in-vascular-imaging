@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 range1 = [210, 310]
 
-file_path = 'D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\data\\37data.dat'
+file_path = 'D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\Installments\\1_67data.dat'
 
 data = ir.Reconstruction532(file_path)
 

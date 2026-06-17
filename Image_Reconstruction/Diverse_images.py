@@ -54,3 +54,9 @@ def Deep_Encoding(data, Range):
     map = (map - map.min()) / (map.max() - map.min())
     argmap = (argmap - argmap.min()) / (argmap.max() - argmap.min())
     return map, argmap
+
+def Deep_Side(data, angle):
+    data = Enhancement_GPU(data)
+    data = data[angle,:,:]
+    map = nonlinear_cuda_style(data)
+    return map

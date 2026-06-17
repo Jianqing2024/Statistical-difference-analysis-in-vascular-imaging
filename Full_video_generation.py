@@ -105,8 +105,8 @@ if os.path.exists(folder_path):
 else:
     print(f"警告: 文件夹不存在 -> {folder_path}")
 
-text_color = (255, 255, 255)  # 白色文字 (RGB)
-shadow_color = (0, 0, 0)  # 黑色阴影 (RGB)
+text_color = (0, 0, 0)  # 白色文字 (RGB)
+shadow_color = (255, 255, 255)  # 黑色阴影 (RGB)
 
 print(len(all_files_A))
 
@@ -173,7 +173,7 @@ for j in range(len(all_files_A)):
         draw.text((x, y), text, font=font, fill=text_color)
 
         # 保存
-        new_img.save(f"D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\vedio\\merged_{j}.tif")
+        new_img.save(f"D:\\WORK\\Statistical-difference-analysis-in-vascular-imaging\\vedio2\\merged_{j}.tif")
 
     print("Done!")
 

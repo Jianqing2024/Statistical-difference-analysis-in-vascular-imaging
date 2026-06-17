@@ -108,7 +108,7 @@ MD = table(T{3}{:,4}*unit, T{2}{:,4}*unit, T{1}{:,4}*unit, 'VariableNames', x);
 f1 = figure(1);
 f1.Color = 'w';
 f1.Units = "centimeters";
-f1.Position = [24, 12, 15, 7];
+f1.Position = [24, 12, 19, 7.5];
 
 t = tiledlayout(2, 5);
 t.TileSpacing = "compact";
